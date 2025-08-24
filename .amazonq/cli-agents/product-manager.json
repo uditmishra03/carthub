@@ -1,0 +1,25 @@
+{
+  "name": "product-manager",
+  "description": "Product Manager for requirements definition",
+  "tools": ["fs_read", "fs_write"],
+  "allowedTools": ["fs_read", "fs_write"],
+  "toolsSettings": {
+    "fs_write": {
+      "deniedPaths": [
+        "**/contexts/**", 
+        "**/tests/**",
+        "**/src/**",
+        "**/shared/bugs.md",
+        "**/shared/status.md",
+        "**/shared/test-report.md",
+        "**/shared/uat-feedback.md"
+      ],
+      "allowedPaths": [
+        "**/shared/requirements.md"
+      ]
+    }
+  },
+  "resources": [
+    "file://contexts/product-manager.md"
+  ]
+}

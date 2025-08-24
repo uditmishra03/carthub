@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: database-migration
+  namespace: shopping-cart
+  labels:
+    app: database-migration
+spec:
+  template:
+    metadata:
+      labels:
+        app: database-migration
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: migration
+        image: 013443956821.dkr.ecr.us-east-1.amazonaws.com/carthub-database:latest
+        env:
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: db-migration-secret
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-migration-secret
+              key: password
+        - name: DATABASE_URL
+          value: "postgresql://$(DB_USERNAME):$(DB_PASSWORD)@carthub-database.cluster-xyz.us-west-2.rds.amazonaws.com:5432/carthub"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 1000
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+  backoffLimit: 3

@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-metrics
+  namespace: shopping-cart
+  labels:
+    app: backend
+    metrics: "true"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: metrics
+  selector:
+    app: backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-metrics
+  namespace: shopping-cart
+  labels:
+    app: frontend
+    metrics: "true"
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: metrics
+  selector:
+    app: frontend
+---
+# ServiceMonitor for Prometheus (if using Prometheus Operator)
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: shopping-cart-metrics
+  namespace: shopping-cart
+  labels:
+    app: shopping-cart
+spec:
+  selector:
+    matchLabels:
+      metrics: "true"
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s

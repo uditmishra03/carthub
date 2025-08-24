@@ -1,0 +1,130 @@
+name: Deploy CartHub to AWS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  S3_BUCKET: carthub-frontend-${{ github.run_id }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Test Application
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Run tests
+        run: |
+          python -m pytest tests/ -v
+          
+      - name: Test frontend
+        run: |
+          cd frontend/public
+          python -m http.server 8080 &
+          sleep 2
+          curl -f http://localhost:8080 || exit 1
+
+  deploy-frontend:
+    needs: test
+    runs-on: ubuntu-latest
+    name: Deploy Frontend to S3
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Create S3 bucket
+        run: |
+          aws s3 mb s3://${{ env.S3_BUCKET }} --region ${{ env.AWS_REGION }} || true
+          aws s3 website s3://${{ env.S3_BUCKET }} --index-document index.html
+          
+      - name: Deploy frontend to S3
+        run: |
+          aws s3 sync frontend/public/ s3://${{ env.S3_BUCKET }}/ --delete
+          
+      - name: Set S3 bucket policy for public access
+        run: |
+          cat > bucket-policy.json << EOF
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Sid": "PublicReadGetObject",
+                "Effect": "Allow",
+                "Principal": "*",
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::${{ env.S3_BUCKET }}/*"
+              }
+            ]
+          }
+          EOF
+          aws s3api put-bucket-policy --bucket ${{ env.S3_BUCKET }} --policy file://bucket-policy.json
+          
+      - name: Output website URL
+        run: |
+          echo "🚀 Frontend deployed to: http://${{ env.S3_BUCKET }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
+
+  deploy-infrastructure:
+    needs: test
+    runs-on: ubuntu-latest
+    name: Deploy Infrastructure
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js for CDK
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Install CDK
+        run: |
+          npm install -g aws-cdk
+          
+      - name: Install CDK dependencies
+        run: |
+          cd infrastructure_cdk
+          pip install -r requirements.txt
+          
+      - name: Deploy infrastructure
+        run: |
+          cd infrastructure_cdk
+          cdk bootstrap
+          cdk deploy --require-approval never
+          
+      - name: Output infrastructure info
+        run: |
+          echo "🏗️ Infrastructure deployed successfully"

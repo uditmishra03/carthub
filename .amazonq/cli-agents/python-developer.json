@@ -1,0 +1,25 @@
+{
+  "name": "python-developer",
+  "description": "Python developer for web application development",
+  "tools": ["fs_read", "fs_write", "execute_bash"],
+  "allowedTools": ["fs_read", "fs_write"],
+  "toolsSettings": {
+    "fs_write": {
+      "deniedPaths": [
+        "**/contexts/**",
+        "**/tests/**",
+        "**/shared/bugs.md",
+        "**/shared/requirements.md",
+        "**/shared/test-report.md",
+        "**/shared/uat-feedback.md"
+      ],
+      "allowedPaths": [
+        "**/shared/status.md",
+        "**/src/**"
+      ]
+    }
+  },
+  "resources": [
+    "file://contexts/python-developer.md"
+  ]
+}

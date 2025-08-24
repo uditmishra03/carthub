@@ -1,0 +1,25 @@
+{
+  "name": "qa-tester",
+  "description": "QA tester for web application functionality",
+  "tools": ["fs_read", "fs_write", "execute_bash"],
+  "allowedTools": ["fs_read", "fs_write"],
+  "toolsSettings": {
+    "fs_write": {
+      "deniedPaths": [
+        "**/contexts/**",
+        "**/src/**",
+        "**/shared/requirements.md",
+        "**/shared/status.md",
+        "**/shared/uat-feedback.md"
+      ],
+      "allowedPaths": [
+        "**/tests/**",
+        "**/shared/test-report.md",
+        "**/shared/bugs.md"
+      ]
+    }
+  },
+  "resources": [
+    "file://contexts/qa-tester.md"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "frontend-developer",
+  "description": "Frontend developer for building and debugging React/Angular applications",
+  "tools": ["fs_read", "fs_write", "execute_bash"],
+  "allowedTools": ["fs_read", "fs_write"],
+  "toolsSettings": {
+    "fs_write": {
+      "deniedPaths": [
+        "**/contexts/**",
+        "**/tests/**",
+        "**/shared/ui-requirements.md",
+        "**/shared/api-specs.md",
+        "**/shared/ui-bugs.md",
+        "**/shared/uat-feedback.md"
+      ],
+      "allowedPaths": [
+        "**/shared/status.md",
+        "**/src/frontend-app/**"
+      ]
+    }
+  },
+  "resources": [
+    "file://contexts/frontend-developer.md"
+  ]
+}
+

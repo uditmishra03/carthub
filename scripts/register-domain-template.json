@@ -1,0 +1,47 @@
+{
+    "DomainName": "carthub-demo.com",
+    "DurationInYears": 1,
+    "AutoRenew": true,
+    "AdminContact": {
+        "FirstName": "YOUR_FIRST_NAME",
+        "LastName": "YOUR_LAST_NAME",
+        "ContactType": "PERSON",
+        "OrganizationName": "CartHub",
+        "AddressLine1": "123 Main Street",
+        "City": "Seattle",
+        "State": "WA",
+        "CountryCode": "US",
+        "ZipCode": "98101",
+        "PhoneNumber": "+1.2065551234",
+        "Email": "admin@example.com"
+    },
+    "RegistrantContact": {
+        "FirstName": "YOUR_FIRST_NAME",
+        "LastName": "YOUR_LAST_NAME",
+        "ContactType": "PERSON",
+        "OrganizationName": "CartHub",
+        "AddressLine1": "123 Main Street",
+        "City": "Seattle",
+        "State": "WA",
+        "CountryCode": "US",
+        "ZipCode": "98101",
+        "PhoneNumber": "+1.2065551234",
+        "Email": "admin@example.com"
+    },
+    "TechContact": {
+        "FirstName": "YOUR_FIRST_NAME",
+        "LastName": "YOUR_LAST_NAME",
+        "ContactType": "PERSON",
+        "OrganizationName": "CartHub",
+        "AddressLine1": "123 Main Street",
+        "City": "Seattle",
+        "State": "WA",
+        "CountryCode": "US",
+        "ZipCode": "98101",
+        "PhoneNumber": "+1.2065551234",
+        "Email": "admin@example.com"
+    },
+    "PrivacyProtectAdminContact": true,
+    "PrivacyProtectRegistrantContact": true,
+    "PrivacyProtectTechContact": true
+}

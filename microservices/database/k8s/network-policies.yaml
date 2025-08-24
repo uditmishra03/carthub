@@ -1,0 +1,87 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-to-database
+  namespace: shopping-cart
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Egress
+  egress:
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 5432
+    - protocol: TCP
+      port: 443  # For AWS services
+    - protocol: TCP
+      port: 80   # For health checks
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-to-backend
+  namespace: shopping-cart
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: backend
+    ports:
+    - protocol: TCP
+      port: 8000
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 443  # For AWS services
+    - protocol: TCP
+      port: 80   # For health checks
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-ingress
+  namespace: shopping-cart
+spec:
+  podSelector:
+    matchLabels:
+      app: backend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: frontend
+    ports:
+    - protocol: TCP
+      port: 8000
+  - from: []  # Allow health checks from load balancer
+    ports:
+    - protocol: TCP
+      port: 8000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend-ingress
+  namespace: shopping-cart
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from: []  # Allow all ingress traffic (from ALB)
+    ports:
+    - protocol: TCP
+      port: 80

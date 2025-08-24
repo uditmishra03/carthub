@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  namespace: shopping-cart
+  labels:
+    app: frontend
+    version: v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+        version: v1
+    spec:
+      containers:
+      - name: frontend
+        image: 013443956821.dkr.ecr.us-east-1.amazonaws.com/carthub-frontend:latest
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: REACT_APP_API_URL
+          value: "http://backend-service:8000"
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 101
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: var-cache-nginx
+          mountPath: /var/cache/nginx
+        - name: var-run
+          mountPath: /var/run
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      - name: var-cache-nginx
+        emptyDir: {}
+      - name: var-run
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - frontend
+              topologyKey: kubernetes.io/hostname

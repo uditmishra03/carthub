@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: admin-user
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: admin-user
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: admin-user
+  namespace: kubernetes-dashboard
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shopping-cart-dashboard
+  namespace: shopping-cart
+data:
+  dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Shopping Cart Microservices",
+        "tags": ["kubernetes", "shopping-cart"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Pod Status",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "kube_pod_status_phase{namespace=\"shopping-cart\"}",
+                "legendFormat": "{{pod}} - {{phase}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "CPU Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(container_cpu_usage_seconds_total{namespace=\"shopping-cart\"}[5m])",
+                "legendFormat": "{{pod}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Memory Usage",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "container_memory_usage_bytes{namespace=\"shopping-cart\"}",
+                "legendFormat": "{{pod}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Request Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "rate(http_requests_total{namespace=\"shopping-cart\"}[5m])",
+                "legendFormat": "{{service}}"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s"
+      }
+    }
